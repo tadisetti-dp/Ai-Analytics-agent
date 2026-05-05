@@ -43,6 +43,9 @@ def token_required(f):
 
 @app.route("/", methods=["GET"])
 def home():
+    # Serve React App on the root URL
+    if app.static_folder and os.path.exists(os.path.join(app.static_folder, 'index.html')):
+        return app.send_static_file('index.html')
     return jsonify({"status": "AI Analytics System Running Successfully"})
 
 @app.route("/register", methods=["POST"])
@@ -295,8 +298,9 @@ def dashboard_data(current_user_id):
 
 # --- DEPLOYMENT CONFIGURATION ---
 @app.errorhandler(404)
+@app.errorhandler(405)
 def not_found(e):
-    # Fallback to React's index.html for client-side routing
+    # Fallback to React's index.html for client-side routing (handles both 404 and GET requests to POST routes)
     if app.static_folder and os.path.exists(os.path.join(app.static_folder, 'index.html')):
         return app.send_static_file('index.html')
     return jsonify({"error": "Not found"}), 404
